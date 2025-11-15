@@ -31,9 +31,6 @@ const map = new maplibregl.Map({
   bearing: 0
 });
 
-// --- Add navigation controls ---
-map.addControl(new maplibregl.NavigationControl());
-
 // --- Load data once the map is ready ---
 map.on('load', () => {
   // Parks layer
@@ -157,7 +154,29 @@ map.on('load', () => {
     }
   });*/
 
-  map.addSource('park_grids', {
+  // Approximate bounding box (from gdf.total_bounds in EPSG:4326)
+  const bounds = [12.38230231, 41.83459507, 12.60979121, 41.98113406]; // [minLon, minLat, maxLon, maxLat]
+
+  map.addSource('parks_png', {
+    type: 'image',
+    url: 'parks_grids_20_largest.png',
+    coordinates: [
+      [bounds[0], bounds[3]], // top-left
+      [bounds[2], bounds[3]], // top-right
+      [bounds[2], bounds[1]], // bottom-right
+      [bounds[0], bounds[1]]  // bottom-left
+    ]
+  });
+
+  map.addLayer({
+    id: 'parks_png',
+    type: 'raster',
+    source: 'parks_png',
+    paint: { 'raster-opacity': 0.9 }
+  });
+
+
+  /*map.addSource('park_grids', {
     type: 'geojson',
     data: 'parks_grids_10_light.geojson',
     buffer: 512,
@@ -177,16 +196,11 @@ map.on('load', () => {
         10, '#003300',
         100, '#006600',
         300, '#00cc00',
-        600, '#00ff00'   // high = bright green
-        /*0, '#00ff00',      // low = black
-        10, '#00cc00',
-        100, '#006600',
-        300, '#003300',
-        600, '#000000'*/   // high = bright green
+        600, '#00ff00' 
       ],
       'fill-opacity': 1
     }
-  });
+  });*/
 
   // Corridors layer
  /* map.addSource('corridors', {
