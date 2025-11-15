@@ -49,14 +49,21 @@ map.on('load', () => {
             'interpolate', ['linear'], ['get', 'population'],
             0, 0,
             1000, 2000,
-            10000, 10000
+            5000, 4000,
+            10000, 5000,
           ],
           // color = CDI red–white–blue scale
-          'fill-extrusion-color': [
+          /*'fill-extrusion-color': [
             'interpolate', ['linear'], ['get', 'CDI'],
             -1, '#0011cc',
              0, '#ffffff',
              1, '#cc0000'
+          ],*/
+          'fill-extrusion-color': [
+            'interpolate', ['linear'], ['get', 'CDI'],
+             0.05, '#009999',   // deep orange for low CDI
+             0.1, '#FFFFFF',   // neutral = white
+             0.6, '#a34700'    // turquoise for high CDI (positive)
           ],
           'fill-extrusion-opacity': 0.65
         }
@@ -69,10 +76,12 @@ map.on('load', () => {
 
 // === Fly through Rome ===
 const stops = [
-  { name: 'North Rome', coords: [12.45, 42.0], zoom: 12, pitch: 65, bearing: 0 },
-  { name: 'Center Rome', coords: [12.49, 41.9], zoom: 13, pitch: 70, bearing: 20 },
-  { name: 'South Rome', coords: [12.52, 41.85], zoom: 12.5, pitch: 60, bearing: -30 },
-  { name: 'East Rome',  coords: [12.58, 41.89], zoom: 13, pitch: 65, bearing: 15 }
+  { name: 'Rome', coords: [12.5, 41.85], zoom: 10.5, pitch: 35, bearing: 0},
+  { name: 'Center Rome', coords: [12.5, 41.88], zoom: 11.65, pitch: 45, bearing: -10 },
+  { name: 'Ostia', coords: [12.27, 41.75], zoom: 12.5, pitch: 50, bearing: 0 },
+  { name: 'Acilia', coords: [12.36, 41.78], zoom: 12.5, pitch: 50, bearing: -40 },
+  { name: 'Torri', coords: [12.66, 41.9], zoom: 12, pitch: 45, bearing: 25 },
+  { name: 'Labaro',  coords: [12.45, 42.02], zoom: 12, pitch: 55, bearing: -15 },
 ];
 
 function flySequence() {
