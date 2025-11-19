@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Visits to parks in Rome</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+  
+  <!-- ✅ MapLibre GL (open-source Mapbox alternative) -->
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    .maplibregl-popup-content { font-family: sans-serif; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+// --- Initialize the map (no access token required) ---
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://basemaps.cartocdn.com/gl/dark-matter-nolabels-gl-style/style.json', // dark basemap
+  center: [12.4964, 41.9028], // Rome
+  zoom: 10,
+  pitch: 45,
+  bearing: 0
+});
+
+// --- Load data once the map is ready ---
+map.on('load', () => {
+  // Parks layer
+  map.addSource('parks', {
+    type: 'geojson',
+    data: 'parks_with_visits.geojson',
+    buffer: 512,
+  });
+  map.addLayer({
+    id: 'parks',
+    type: 'fill',
+    source: 'parks',
+    paint: {
+      'fill-color': '#00ff88',
+      'fill-opacity': 0.5
+    }
+  });
+  /*// --- Villa Doria Pamphilj layer ---
+  map.addSource('villa_doria_pamphilj', {
+    type: 'geojson',
+    data: 'villa_doria_pamphilj_with_visits_4326.geojson'
+  });
+
+  map.addLayer({
+    id: 'villa_doria_pamphilj',
+    type: 'fill',
+    source: 'villa_doria_pamphilj',
+    paint: {
+      // color scale from black (few visits) to green (many visits)
+      'fill-color': [
+        'interpolate',
+        ['linear'],
+        ['get', 'n_visits'],
+        0, '#000000',      // low = black
+        10, '#003300',
+        100, '#006600',
+        300, '#00cc00',
+        600, '#00ff00'   // high = bright green
+      ],
+      'fill-opacity': 1
+    }
+  });
+
+  // --- Villa Borghese layer ---
+  map.addSource('villa_borghese', {
+    type: 'geojson',
+    data: 'villa_borghese_with_visits_4326.geojson'
+  });
+
+  map.addLayer({
+    id: 'villa_borghese',
+    type: 'fill',
+    source: 'villa_borghese',
+    paint: {
+      // color scale from black (few visits) to green (many visits)
+      'fill-color': [
+        'interpolate',
+        ['linear'],
+        ['get', 'n_visits'],
+        0, '#000000',      // low = black
+        10, '#003300',
+        100, '#006600',
+        300, '#00cc00',
+        600, '#00ff00'   // high = bright green
+      ],
+      'fill-opacity': 1
+    }
+  });*/
+
+  /*fetch('parks_grids_20_largest.geojson')
+    .then(r => r.json())
+    .then(data => {
+      map.addSource('park_grids', {
+        type: 'geojson',
+        data: data,
+        buffer: 512
+      });
+      map.addLayer({
+        id: 'park_grids',
+        type: 'fill',
+        source: 'park_grids',
+        paint: {
+          // color scale from black (few visits) to green (many visits)
+          'fill-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'n_visits'],
+            0, '#000000',      // low = black
+            10, '#003300',
+            100, '#006600',
+            300, '#00cc00',
+            600, '#00ff00'   // high = bright green
+          ],
+          'fill-opacity': 1
+        }
+      });
+    });*/
+
+  /*map.addSource('park_grids', {
+    type: 'vector',
+    tiles: ['http://localhost:8000/tiles/{z}/{x}/{y}.pbf'],
+    minzoom: 8,
+    maxzoom: 14
+  });
+
+  map.addLayer({
+    id: 'park_grids',
+    type: 'fill',
+    source: 'park_grids',
+    'source-layer': 'park_grids',  // same name as used in tippecanoe
+    paint: {
+      'fill-color': [
+        'interpolate', ['linear'], ['get', 'n_visits'],
+        0, '#000000',
+        10, '#003300',
+        100, '#006600',
+        300, '#00cc00',
+        600, '#00ff00'
+      ],
+      'fill-opacity': 1
+    }
+  });*/
+
+  // Approximate bounding box (from gdf.total_bounds in EPSG:4326)
+  const bounds = [12.38230231, 41.83459507, 12.60979121, 41.98113406]; // [minLon, minLat, maxLon, maxLat]
+
+  map.addSource('parks_png', {
+    type: 'image',
+    url: 'parks_grids_20_largest.png',
+    coordinates: [
+      [bounds[0], bounds[3]], // top-left
+      [bounds[2], bounds[3]], // top-right
+      [bounds[2], bounds[1]], // bottom-right
+      [bounds[0], bounds[1]]  // bottom-left
+    ]
+  });
+
+  map.addLayer({
+    id: 'parks_png',
+    type: 'raster',
+    source: 'parks_png',
+    paint: { 'raster-opacity': 0.9 }
+  });
+
+
+  /*map.addSource('park_grids', {
+    type: 'geojson',
+    data: 'parks_grids_10_light.geojson',
+    buffer: 512,
+  });
+
+  map.addLayer({
+    id: 'park_grids',
+    type: 'fill',
+    source: 'park_grids',
+    paint: {
+      // color scale from black (few visits) to green (many visits)
+      'fill-color': [
+        'interpolate',
+        ['linear'],
+        ['get', 'n_visits'],
+        0, '#000000',      // low = black
+        10, '#003300',
+        100, '#006600',
+        300, '#00cc00',
+        600, '#00ff00' 
+      ],
+      'fill-opacity': 1
+    }
+  });*/
+
+  // Corridors layer
+ /* map.addSource('corridors', {
+    type: 'geojson',
+    data: 'rome_green_corridors_trimmed.geojson'
+  });
+  map.addLayer({
+    id: 'corridors',
+    type: 'line',
+    source: 'corridors',
+    paint: {
+      'line-color': '#00ff00',
+      'line-width': 2
+    }
+  });*/
+
+  // --- FlyTo animation sequence ---
+  /*const locations = [
+    { name: 'Villa Doria Pamphilj', coords: [12.4449, 41.8886], zoom: 14, pitch: 60, bearing: 10 },
+    { name: 'Villa Borghese', coords: [12.4833, 41.9142], zoom: 14.5, pitch: 65, bearing: -10 },
+    { name: 'Parco degli Acquedotti', coords: [12.563, 41.85], zoom: 14, pitch: 60, bearing: 15 },
+    { name: 'Parco della Caffarella', coords: [12.5125, 41.867], zoom: 14, pitch: 70, bearing: 30 },
+    { name: 'Parco di Centocelle', coords: [12.565, 41.879], zoom: 14, pitch: 60, bearing: -20 }
+  ];*/
+
+});
+
+map.on('data', (e) => {
+  if (e.sourceId === 'parks' && e.isSourceLoaded) console.log('✅ Parks loaded');
+  if (e.sourceId === 'villa_doria_pamphilj' && e.isSourceLoaded) console.log('✅ Villa Doria Pamphilj loaded');
+  if (e.sourceId === 'corridors' && e.isSourceLoaded) console.log('✅ Corridors loaded');
+});
+
+</script>
+
+</body>
+</html>
